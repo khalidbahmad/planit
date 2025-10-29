@@ -1,0 +1,69 @@
+# =====================
+# Laravel / PHP
+# =====================
+
+# Composer
+/vendor
+/composer.lock
+
+# Environment
+.env
+.env.local
+.env.*.local
+.env.backup
+.env.production
+/auth.json
+
+# Storage (cache, logs, sessions, views, keys)
+storage/*.key
+/storage/logs/*.log
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/pail
+
+# Public build / hot reload (Laravel Mix)
+public/build
+/public/hot
+/public/storage
+/public/js
+/public/css
+/public/mix-manifest.json
+
+# PHPUnit
+.phpunit.result.cache
+/.phpunit.cache
+
+# Homestead
+Homestead.json
+Homestead.yaml
+
+# =====================
+# React / Node
+# =====================
+
+# Node modules
+/node_modules
+
+# Build folder
+/build
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# =====================
+# IDE / OS
+# =====================
+
+# IDEs
+.idea/
+.vscode/
+/.fleet
+/.nova
+/.zed
+
+# OS
+.DS_Store
+Thumbs.db
