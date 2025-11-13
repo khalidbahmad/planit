@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { Avatar } from '../components/Avatar';
@@ -9,35 +9,34 @@ import {
   InfoIcon, MessageSquareIcon, ShareIcon,
   HeartIcon, BookmarkIcon
 } from 'lucide-react';
-// CORRECTED: Assuming the API function is named 'joinActivity'
 import { getActivities, joinActivity } from "../services/api"; 
 
 export default function ActivityDetail() {
   const { idActivite } = useParams();
-  const [activity, setActivity] = useState(null); // State to hold the specific activity
+  const [activity, setActivity] = useState(null);
   const [activeTab, setActiveTab] = useState('details');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
-  // --- MOCK USER STATE (REPLACE WITH YOUR ACTUAL AUTH CONTEXT/REDUX STATE) ---
+
+  // 🔹 MOCK USER - remplacer par ton AuthContext réel
   const loggedInUser = { 
-    id: 101, // The ID used for checking attendance/comment access
+    id: 101,
     nom: "Dupont",
     prenom: "Alice",
     photoProfil: "https://i.pravatar.cc/150?img=1"
   };
-  // -------------------------------------------------------------------------
 
-  // 1. Fetch Activities and set the specific activity
+  // Memoize l'utilisateur pour useCallback
+  const memoizedUser = useMemo(() => loggedInUser, [loggedInUser]);
+
+  // --- Fetch activity by ID ---
   useEffect(() => {
     const fetchActivity = async () => {
       try {
         setLoading(true);
-        // NOTE: Ideally, you should have an API endpoint like `getActivityById(idActivite)`
-        const response = await getActivities(); 
+        const response = await getActivities();
         const allActivities = response.data;
         const foundActivity = allActivities.find(a => a.idActivite.toString() === idActivite);
-        
         setActivity(foundActivity);
       } catch (err) {
         console.error("Erreur de récupération :", err);
@@ -46,57 +45,42 @@ export default function ActivityDetail() {
         setLoading(false);
       }
     };
-
     fetchActivity();
   }, [idActivite]);
-  
-  // --- CORE LOGIC: Check Join Status & Handle Join Action ---
-  const isJoined = loggedInUser && activity?.attendees?.some(p => p.idUtilisateur === loggedInUser.id);
-  const attendeesCount = activity?.attendees?.length || 0;
 
-  // FIX: Moved useCallback before early returns to comply with React Hooks rules
-  const memoizedUser = useMemo(() => loggedInUser, [loggedInUser]);
-  
+  if (loading) return <p className="text-center mt-10">Chargement...</p>;
+  if (error) return <p className="text-center mt-10 text-red-500">{error}</p>;
+  if (!activity) return <p className="text-center mt-10">Activité non trouvée</p>;
+
+  const attendeesCount = activity?.attendees?.length || 0;
+  const isJoined = memoizedUser && activity?.attendees?.some(p => p.idUtilisateur === memoizedUser.id);
+
+  // --- Join Activity ---
   const handleJoinActivity = useCallback(async (id) => {
     if (!memoizedUser) {
       alert("Veuillez vous connecter pour participer.");
       return;
     }
-  
-    // ... ton code pour rejoindre l’activité ici
-  }, [memoizedUser]);
 
-
-    // Prevents joining if already joined or activity is full (if applicable)
     if (isJoined || (activity.nbMaxParticipants && attendeesCount >= activity.nbMaxParticipants)) {
-        return; 
+      alert("Impossible de rejoindre : activité complète ou déjà inscrite !");
+      return;
     }
 
     try {
-      // API Call to the backend to add the user to the attendees list
-      const updatedActivityData = await joinActivity(id, loggedInUser.id); 
-      
-      // Update local state to reflect the change immediately
-      setActivity(prevActivity => ({
-        ...prevActivity,
-        // Use the attendees data returned by the API
-        attendees: updatedActivityData.attendees, 
+      const updatedActivityData = await joinActivity(id, memoizedUser.id);
+      setActivity(prev => ({
+        ...prev,
+        attendees: updatedActivityData.attendees,
       }));
-
       alert("Vous avez rejoint l'activité avec succès ! 🎉");
     } catch (err) {
       console.error("Erreur lors de l'inscription :", err);
-      // You might want to update the error state here
+      alert("Erreur lors de l'inscription.");
     }
-  }, [loggedInUser, isJoined, attendeesCount, activity?.nbMaxParticipants]); 
-  // Dependency includes all values used inside the hook that can change
+  }, [memoizedUser, isJoined, attendeesCount, activity?.nbMaxParticipants]);
 
-  // --- EARLY RETURNS ---
-  if (loading) return <p className="text-center mt-10">Chargement...</p>;
-  if (error) return <p className="text-center mt-10 text-red-500">{error}</p>;
-  if (!activity) return <p className="text-center mt-10">Activité non trouvée</p>;
-
-  // --- DATA MAPPING ---
+  // --- Organizer ---
   const organizer = activity.organisateur?.utilisateur || {
     nom: "Inconnu",
     prenom: "",
@@ -151,17 +135,15 @@ export default function ActivityDetail() {
           </div>
         );
       case 'comments':
-        // ACCESS CONTROL: Allow commenting if joined OR if the user is the organizer
-        const canComment = isJoined || (activity.organisateur?.idUtilisateur === loggedInUser.id); 
-
+        const canComment = isJoined || (activity.organisateur?.idUtilisateur === memoizedUser.id);
         if (!canComment) {
-            return (
-                <div className="p-6 bg-yellow-50 border border-yellow-200 rounded-lg text-center">
-                    <MessageSquareIcon size={24} className="mx-auto text-yellow-600 mb-3" />
-                    <p className="font-semibold text-yellow-800 mb-2">Participez pour commenter !</p>
-                    <p className="text-sm text-yellow-700">Vous devez être inscrit à cette activité pour laisser un commentaire.</p>
-                </div>
-            );
+          return (
+            <div className="p-6 bg-yellow-50 border border-yellow-200 rounded-lg text-center">
+              <MessageSquareIcon size={24} className="mx-auto text-yellow-600 mb-3" />
+              <p className="font-semibold text-yellow-800 mb-2">Participez pour commenter !</p>
+              <p className="text-sm text-yellow-700">Vous devez être inscrit à cette activité pour laisser un commentaire.</p>
+            </div>
+          );
         }
 
         return (
@@ -179,7 +161,6 @@ export default function ActivityDetail() {
         return null;
     }
   };
-  // --- END renderTabContent ---
 
   return (
     <div className="bg-slate-50 min-h-screen">
@@ -211,17 +192,17 @@ export default function ActivityDetail() {
                 <span className="ml-2 text-sm text-gray-500">({Number(activity.rating) || 4.5} / 5)</span>
               </div>
             </div>
-            
+
             {/* Join Button */}
             <div className="mt-4 md:mt-0">
-                <Button 
-                    variant={isJoined ? "secondary" : "primary"} 
-                    size="lg"
-                    onClick={() => handleJoinActivity(activity.idActivite)}
-                    disabled={isJoined || attendeesCount >= (activity.nbMaxParticipants || Infinity)}
-                >
-                    {isJoined ? "Inscrit" : "Participer"}
-                </Button>
+              <Button 
+                variant={isJoined ? "secondary" : "primary"} 
+                size="lg"
+                onClick={() => handleJoinActivity(activity.idActivite)}
+                disabled={isJoined || attendeesCount >= (activity.nbMaxParticipants || Infinity)}
+              >
+                {isJoined ? "Inscrit" : "Participer"}
+              </Button>
             </div>
           </div>
 
