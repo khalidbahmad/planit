@@ -55,11 +55,17 @@ export default function ActivityDetail() {
   const attendeesCount = activity?.attendees?.length || 0;
 
   // FIX: Moved useCallback before early returns to comply with React Hooks rules
+  const memoizedUser = useMemo(() => loggedInUser, [loggedInUser]);
+  
   const handleJoinActivity = useCallback(async (id) => {
-    if (!loggedInUser) {
+    if (!memoizedUser) {
       alert("Veuillez vous connecter pour participer.");
       return;
     }
+  
+    // ... ton code pour rejoindre l’activité ici
+  }, [memoizedUser]);
+
 
     // Prevents joining if already joined or activity is full (if applicable)
     if (isJoined || (activity.nbMaxParticipants && attendeesCount >= activity.nbMaxParticipants)) {
