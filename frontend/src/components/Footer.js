@@ -61,13 +61,33 @@ export function Footer() {
         <hr className="my-6 border-gray-200" />
         <div className="flex flex-col md:flex-row md:items-center md:justify-between">
           <div className="flex space-x-4">
-            <a href="#" className="text-gray-500 hover:text-primary" aria-label="Facebook">
+            <a
+              href="https://facebook.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-500 hover:text-primary"
+              aria-label="Facebook"
+            >
               <FacebookIcon size={20} />
             </a>
-            <a href="#" className="text-gray-500 hover:text-primary" aria-label="Twitter">
+          
+            <a
+              href="https://twitter.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-500 hover:text-primary"
+              aria-label="Twitter"
+            >
               <TwitterIcon size={20} />
             </a>
-            <a href="#" className="text-gray-500 hover:text-primary" aria-label="Instagram">
+          
+            <a
+              href="https://instagram.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-500 hover:text-primary"
+              aria-label="Instagram"
+            >
               <InstagramIcon size={20} />
             </a>
           </div>
