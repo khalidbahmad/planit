@@ -36,40 +36,34 @@ const Button = ({ children, className = "", ...props }) => (
 );
 
 // ----------------------------------------------------
-// --- LOGIQUE DE FILTRAGE DES ACTIVITÉS ---
-// ----------------------------------------------------
-const isActivityCurrent = (activity) => {
-    // Comparaison basée sur la date de l'activité
-    const activityDate = new Date(activity.dateActivite);
-    const today = new Date();
-    // Normaliser à minuit pour comparer les jours seulement
-    activityDate.setHours(0, 0, 0, 0);
-    today.setHours(0, 0, 0, 0);
-
-    return activityDate >= today;
-};
-
-// ----------------------------------------------------
 // --- DASHBOARD DES RÔLES NON-ADMINISTRATEUR (Participant / Organisateur) ---
 // ----------------------------------------------------
 const UserActivitiesDashboard = ({ user, activities, loading }) => {
-    const isParticipant = user?.typeUtilisateur === "participant";
+  const isParticipant = user?.typeUtilisateur === "participant";
 
-    if (loading) {
-        return <div className="p-8 text-center text-xl text-blue-500">Chargement de vos activités...</div>;
-    }
-    
-    // Filtrer les activités en cours et passées
-    const isActivityCurrent = (activity) => {
-        const activityDate = new Date(activity.dateActivite);
-        const today = new Date();
-        activityDate.setHours(0, 0, 0, 0);
-        today.setHours(0, 0, 0, 0);
-        return activityDate >= today;
-    };
+  if (loading) {
+    return (
+      <div className="p-8 text-center text-xl text-blue-500">
+        Chargement de vos activités...
+      </div>
+    );
+  }
 
-    const currentActivities = activities.filter(isActivityCurrent);
-    const pastActivities = activities.filter(a => !isActivityCurrent(a));
+  // ✅ Une seule version ici
+  const isActivityCurrent = (activity) => {
+    const activityDate = new Date(activity.dateActivite);
+    const today = new Date();
+    activityDate.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+    return activityDate >= today;
+  };
+
+  const currentActivities = activities.filter(isActivityCurrent);
+  const pastActivities = activities.filter((a) => !isActivityCurrent(a));
+
+  // ... ton rendu JSX ici
+};
+
 
     const title = isParticipant ? "Mes Participations" : "Mes Activités Créées";
 
