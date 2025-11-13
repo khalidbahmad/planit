@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { UsersIcon, CalendarIcon, MessageSquareIcon, HomeIcon, LayersIcon, PlusCircleIcon } from 'lucide-react';
+import { CalendarIcon, MessageSquareIcon, HomeIcon, LayersIcon, PlusCircleIcon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export function Sidebar() {
