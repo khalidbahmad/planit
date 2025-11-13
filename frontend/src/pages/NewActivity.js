@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import { PlusCircleIcon } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import { createActivity } from '../services/api'; // Assurez-vous que cette fonction existe
 import { useAuth } from '../context/AuthContext';
 
 export default function NewActivity() {
   const {user} = useAuth();
 
-  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     titre: '',
     description: '',
