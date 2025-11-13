@@ -3,7 +3,7 @@ import { updateUser } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 
 export default function EditProfile() {
-  const { user, setUser } = useAuth(); // ✅ vient du AuthContext
+  const { user } = useAuth();
   const [formData, setFormData] = useState({});
   const [saving, setSaving] = useState(false);
 
