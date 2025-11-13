@@ -24,7 +24,6 @@ export default function EditProfile() {
     setSaving(true);
     try {
       const res = await updateUser(user.idUtilisateur, formData);
-      // setUser(res.data); // 🔄 met à jour le contexte utilisateur
       alert("✅ Profil mis à jour avec succès !");
     } catch (error) {
       console.error("Erreur lors de la mise à jour :", error);
